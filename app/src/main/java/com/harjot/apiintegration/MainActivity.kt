@@ -10,17 +10,20 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.harjot.apiintegration.adapters.RecyclerAdapter
 import com.harjot.apiintegration.databinding.ActivityMainBinding
 import com.harjot.apiintegration.databinding.DialogLayoutBinding
 import com.harjot.apiintegration.interfaces.RecyclerInterface
-import com.harjot.apiintegration.models.RecyclerModel
+import com.harjot.apiintegration.models.ResponseModel
 
 class MainActivity : AppCompatActivity(),RecyclerInterface {
     lateinit var binding: ActivityMainBinding
-    var arrayList = ArrayList<RecyclerModel>()
+    var arrayList = ArrayList<ResponseModel.Data>()
     var recyclerAdapter = RecyclerAdapter(arrayList,this)
+    lateinit var vmClass:VMclass
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,11 +37,13 @@ class MainActivity : AppCompatActivity(),RecyclerInterface {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        initViews()
+        vmClass.apiHit()
 
-        arrayList.add(RecyclerModel(
-            "Harjot",
-            "Singh",
-            "harjot@gmail.com"
+        arrayList.add(ResponseModel.Data(
+            first_name = "Harjot",
+            last_name = "Singh",
+            email = "harjot@gmail.com"
         ))
         recyclerAdapter.notifyDataSetChanged()
         //Recycler CRUD
@@ -88,18 +93,42 @@ class MainActivity : AppCompatActivity(),RecyclerInterface {
                 WindowManager.LayoutParams.WRAP_CONTENT
             )
             dialogBinding.etEmail.setText(arrayList[position].email)
-            dialogBinding.etFirstName.setText(arrayList[position].firstName)
-            dialogBinding.etLastName.setText(arrayList[position].lastName)
+            dialogBinding.etFirstName.setText(arrayList[position].first_name)
+            dialogBinding.etLastName.setText(arrayList[position].last_name)
             dialogBinding.btnUpdate.setOnClickListener {
-                arrayList[position]= RecyclerModel(
-                    dialogBinding.etFirstName.text.toString(),
-                    dialogBinding.etLastName.text.toString(),
-                    dialogBinding.etEmail.text.toString()
+                arrayList[position]= ResponseModel.Data(
+                    first_name = dialogBinding.etFirstName.text.toString(),
+                    last_name = dialogBinding.etLastName.text.toString(),
+                    email = dialogBinding.etEmail.text.toString()
                 )
                 recyclerAdapter.notifyDataSetChanged()
                 dismiss()
             }
             show()
+        }
+    }
+    private fun initViews(){
+        vmClass = ViewModelProvider(this)[VMclass::class.java]
+        vmClass.getRes.observe(this){
+            when(it){
+                is SealedClass.Success -> {
+                    Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show()
+                    arrayList.clear()
+                    it.data?.data?.forEach{
+                        arrayList.add(it)
+                    }
+                    recyclerAdapter.notifyDataSetChanged()
+                }
+                is SealedClass.Error -> {
+                    Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show()
+                }
+                is SealedClass.Loading -> {
+                    Toast.makeText(this, "Loading", Toast.LENGTH_SHORT).show()
+                }
+                null->{
+                    Toast.makeText(this, "null", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 }

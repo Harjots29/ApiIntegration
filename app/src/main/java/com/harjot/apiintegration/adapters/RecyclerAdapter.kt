@@ -8,9 +8,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.harjot.apiintegration.R
 import com.harjot.apiintegration.interfaces.RecyclerInterface
-import com.harjot.apiintegration.models.RecyclerModel
+import com.harjot.apiintegration.models.ResponseModel
 
-class RecyclerAdapter(var arrayList:ArrayList<RecyclerModel>,var recyclerInterface: RecyclerInterface):
+class RecyclerAdapter(var arrayList:ArrayList<ResponseModel.Data>,var recyclerInterface: RecyclerInterface):
     RecyclerView.Adapter<RecyclerAdapter.ViewHolder>() {
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
         var tvFirstName = view.findViewById<TextView>(R.id.tvFirstName)
@@ -31,8 +31,8 @@ class RecyclerAdapter(var arrayList:ArrayList<RecyclerModel>,var recyclerInterfa
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.tvFirstName.setText(arrayList[position].firstName)
-        holder.tvLastName.setText(arrayList[position].lastName)
+        holder.tvFirstName.setText(arrayList[position].first_name)
+        holder.tvLastName.setText(arrayList[position].last_name)
         holder.tvEmail.setText(arrayList[position].email)
         holder.item.setOnClickListener {
             recyclerInterface.listClick(position)
